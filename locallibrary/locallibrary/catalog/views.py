@@ -34,3 +34,13 @@ class BookDetailView(generic.DetailView):
 class BookListView(generic.ListView):
     model = Book
     paginate_by = 10
+
+class AuthorListView(generic.ListView):
+    model = Author
+    template_name = 'catalog/author_list.html'  # Шаблон для отображения списка авторов
+    context_object_name = 'author_list'  # Имя переменной, которая будет использоваться в шаблоне
+
+class AuthorDetailView(generic.DetailView):
+    model = Author
+    template_name = 'catalog/author_detail.html'  # Шаблон для отображения информации об авторе
+    context_object_name = 'author'  # Имя переменной, которая будет использоваться в шаблоне
