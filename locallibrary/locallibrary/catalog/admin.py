@@ -43,5 +43,8 @@ class BookInstanceAdmin(admin.ModelAdmin):
         }),
     )
 
+class Test:
+    pass
+
 
 
