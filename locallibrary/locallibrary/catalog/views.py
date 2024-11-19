@@ -55,3 +55,7 @@ class AuthorDetailView(generic.DetailView):
     context_object_name = 'author'  # Имя переменной, которая будет использоваться в шаблоне
 
 
+class AuthorDetailView(generic.DetailView):
+    model = Author
+    template_name = 'catalog/author_detail.html'  # Шаблон для отображения информации об авторе
+    context_object_name = 'author'  # Имя переменной, которая будет использоваться в шаблоне
