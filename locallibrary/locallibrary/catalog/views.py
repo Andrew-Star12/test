@@ -4,6 +4,8 @@ from django.views import generic
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 
 
 def index(request):
@@ -54,8 +56,32 @@ class AuthorDetailView(generic.DetailView):
     template_name = 'catalog/author_detail.html'  # Шаблон для отображения информации об авторе
     context_object_name = 'author'  # Имя переменной, которая будет использоваться в шаблоне
 
+class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
+    """
+    Generic class-based view listing books on loan to current user.
+    """
+    model = BookInstance
+    template_name ='catalog/bookinstance_list_borrowed_user.html'
+    paginate_by = 10
 
-class AuthorDetailView(generic.DetailView):
-    model = Author
-    template_name = 'catalog/author_detail.html'  # Шаблон для отображения информации об авторе
-    context_object_name = 'author'  # Имя переменной, которая будет использоваться в шаблоне
+    def get_queryset(self):
+        return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
+
+
+
+class AllLoanedBooksListView(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):
+    """
+    Представление, которое показывает все книги, взятые в аренду, с именами заёмщиков.
+    Доступно только библиотекарям.
+    """
+    model = BookInstance
+    template_name = 'catalog/all_loaned_books.html'
+    context_object_name = 'bookinstances'  # Название переменной, доступной в шаблоне
+
+    def get_queryset(self):
+        """Фильтруем все книги, которые находятся в статусе 'on loan'."""
+        return BookInstance.objects.filter(status='o').order_by('due_back')
+
+    def test_func(self):
+        """Проверяем, является ли пользователь библиотекарем."""
+        return self.request.user.groups.filter(name='Librarians').exists()
