@@ -25,6 +25,7 @@
         <li><a href="{% url 'book_list' %}">All books</a></li>
         <li><a href="{% url 'author-list' %}">All authors</a></li>
         {% if user.is_authenticated %}
+        <br>
         <li>User: {{ user.get_username }}</li>
         <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
         <form action="{% url 'logout' %}" method="post">
@@ -33,6 +34,10 @@
         </form>
         {% else %}
         <li><a href="{% url 'login'%}">Login</a></li>
+        {% endif %}
+        <br>
+        {% if is_librarian %}
+        <li><a href="{% url 'all-loaned-books' %}">All Loaned Books</a></li>
         {% endif %}
       </ul>
 

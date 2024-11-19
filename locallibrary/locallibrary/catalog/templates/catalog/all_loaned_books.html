@@ -15,6 +15,11 @@
         {% else %}
         No borrower
         {% endif %}
+
+        <!-- Если пользователь библиотекарь, показываем ссылку для обновления книги -->
+        {% if is_librarian %}
+            <a href="{% url 'renew-book-librarian' bookinst.pk %}">Renew</a>
+        {% endif %}
     </li>
     {% endfor %}
 </ul>
