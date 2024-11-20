@@ -1,5 +1,4 @@
-from django.shortcuts import render
-from .models import Book, Author, BookInstance
+from .models import Book
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import permission_required
@@ -24,7 +23,7 @@ def index(request):
     num_instances = BookInstance.objects.all().count()
     # Доступные книги (статус = 'a')
     num_instances_available = BookInstance.objects.filter(status__exact='a').count()
-    num_authors = Author.objects.count()  # Метод 'all()' применён по умолчанию.
+    num_authors = Author.objects.count()
 
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get('num_visits', 0)
@@ -61,7 +60,6 @@ class BookDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Проверяем, является ли пользователь аутентифицированным и входит ли он в группу 'Librarians'
         context['is_librarian'] = self.request.user.is_authenticated and self.request.user.groups.filter(
             name='Librarians').exists()
         return context
@@ -72,7 +70,6 @@ class BookListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Проверяем, является ли пользователь аутентифицированным и входит ли он в группу 'Librarians'
         context['is_librarian'] = self.request.user.is_authenticated and self.request.user.groups.filter(
             name='Librarians').exists()
         return context
@@ -85,7 +82,6 @@ class AuthorListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Добавляем в контекст информацию о том, является ли пользователь библиотекарем
         context['is_librarian'] = self.request.user.groups.filter(name='Librarians').exists()
         return context
 
