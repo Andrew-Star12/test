@@ -3,6 +3,12 @@
 {% block content %}
 <h1>Book List</h1>
 
+
+{% if is_librarian %}
+    <a href="{% url 'book-create' %}" class="btn btn-primary">Add a New Book</a>
+<br>
+{% endif %}
+<br>
 {% if book_list %}
 <ul>
     {% for book in book_list %}

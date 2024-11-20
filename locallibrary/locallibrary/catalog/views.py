@@ -47,14 +47,36 @@ class BookListView(generic.ListView):
     template_name = 'catalog/book_list.html'  # Убедитесь, что шаблон существует
     context_object_name = 'book_list'  # Используемое имя для списка книг в шаблоне
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Проверяем, является ли пользователь аутентифицированным и входит ли он в группу 'Librarians'
+        context['is_librarian'] = self.request.user.is_authenticated and self.request.user.groups.filter(
+            name='Librarians').exists()
+        return context
+
 class BookDetailView(generic.DetailView):
     model = Book
     template_name = 'catalog/book_detail.html'  # Убедитесь, что шаблон существует
     context_object_name = 'book'  # Имя переменной, которая будет передана в шаблон
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Проверяем, является ли пользователь аутентифицированным и входит ли он в группу 'Librarians'
+        context['is_librarian'] = self.request.user.is_authenticated and self.request.user.groups.filter(
+            name='Librarians').exists()
+        return context
+
 class BookListView(generic.ListView):
     model = Book
     paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Проверяем, является ли пользователь аутентифицированным и входит ли он в группу 'Librarians'
+        context['is_librarian'] = self.request.user.is_authenticated and self.request.user.groups.filter(
+            name='Librarians').exists()
+        return context
+
 
 class AuthorListView(generic.ListView):
     model = Author
@@ -176,13 +198,28 @@ class AuthorUpdate(UpdateView):
     success_url = reverse_lazy('author-list')
 
 
-
-
 class AuthorDelete(DeleteView):
     model = Author
     template_name = 'catalog/author_confirm_delete.html'
     success_url = reverse_lazy('author-list')
 
+class BookCreate(CreateView):
+    model = Book
+    fields = '__all__'  # Все поля модели Book будут отображаться в форме
+    initial = {'isbn': '0000000000000'}  # Пример для начального значения поля (опционально)
+    template_name = 'catalog/book_form.html'
+    success_url = reverse_lazy('book_list')  # Путь, куда пользователь будет перенаправлен после успешного создания
+
+class BookUpdate(UpdateView):
+    model = Book
+    fields = ['title', 'author', 'summary', 'isbn', 'genre']  # Поля, которые будут доступны для редактирования
+    template_name = 'catalog/book_form.html'  # Шаблон, который будет использоваться для отображения формы
+    success_url = reverse_lazy('book_list')  # Путь, куда пользователь будет перенаправлен после успешного обновления
+
+class BookDelete(DeleteView):
+    model = Book
+    template_name = 'catalog/book_confirm_delete.html'  # Шаблон для подтверждения удаления
+    success_url = reverse_lazy('book_list')  # Путь, куда пользователь будет перенаправлен после успешного удаления
 
 
 
