@@ -3,6 +3,7 @@ from django.urls import reverse #Used to generate URLs by reversing the URL patt
 import uuid # Required for unique book instances
 from django.contrib.auth.models import User
 from datetime import date
+from django.contrib.auth.models import AbstractUser, Group, Permission
 
 class MyModelName(models.Model):
     """Типичный класс модели, производный от класса Model."""
@@ -136,5 +137,29 @@ class Author(models.Model):
         """
         return '%s, %s' % (self.last_name, self.first_name)
 
+class CustomUser(AbstractUser):
+    secret_question = models.CharField(max_length=255, blank=True, null=True)
+    secret_answer = models.CharField(max_length=255, blank=True, null=True)
 
+    # Исправление конфликта реверсных связей
+    groups = models.ManyToManyField(
+        Group,
+        related_name='customuser_groups',  # Уникальное имя для реверсной связи
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='customuser_permissions',  # Уникальное имя для реверсной связи
+        blank=True
+    )
 
+    def __str__(self):
+        return self.username
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    secret_question = models.CharField(max_length=255, blank=True, null=True)
+    secret_answer = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"

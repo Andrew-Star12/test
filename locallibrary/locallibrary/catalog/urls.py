@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from django.contrib.auth.views import LogoutView
+from django.urls import path
+from .views import CustomLoginView
 
 
 urlpatterns = [
@@ -19,4 +21,6 @@ urlpatterns = [
     path('book/create/', views.BookCreate.as_view(), name='book-create'),
     path('book/<int:pk>/update/', views.BookUpdate.as_view(), name='book-update'),
     path('book/<int:pk>/delete/', views.BookDelete.as_view(), name='book-delete'),
+    path('forgot-password/', views.reset_password_view, name='forgot-password'),
+    path('login/', CustomLoginView.as_view(), name='login_name'),  # Кастомная страница входа
 ]

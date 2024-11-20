@@ -13,6 +13,24 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Author
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import PasswordChangeForm
+from django.core.mail import send_mail
+from django.conf import settings
+from .forms import SecretQuestionForm
+from django.contrib import messages
+from django.utils.crypto import get_random_string
+from django.contrib.auth import views as auth_views
+from django.shortcuts import render, redirect
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
+from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.utils.crypto import get_random_string
+from .forms import ResetPasswordForm
 
 def index(request):
     """
@@ -218,4 +236,43 @@ class BookDelete(DeleteView):
     success_url = reverse_lazy('book_list')  # Путь, куда пользователь будет перенаправлен после успешного удаления
 
 
+def reset_password_view(request):
+    if request.method == "POST":
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            secret_answer = form.cleaned_data['secret_answer']
 
+            user = User.objects.filter(username=username).first()
+
+            if user:
+                # Получаем профиль пользователя и проверяем секретный ответ
+                profile = user.profile
+                if profile.secret_answer == secret_answer:
+                    # Генерация нового пароля
+                    new_password = get_random_string(length=8)
+
+                    # Обновляем пароль пользователя
+                    user.set_password(new_password)
+                    user.save()
+
+                    # Отображаем новый пароль на экране
+                    return HttpResponse(f"Ваш новый пароль: {new_password}")
+                else:
+                    return HttpResponse("Неверный ответ на секретный вопрос.")
+            else:
+                return HttpResponse("Пользователь не найден.")
+    else:
+        form = ResetPasswordForm()
+
+    return render(request, 'catalog/forgot-password.html', {'form': form})
+
+
+class CustomLoginView(auth_views.LoginView):
+    template_name = 'registration/login.html'  # Укажите путь к вашему шаблону
+    authentication_form = AuthenticationForm  # Стандартная форма аутентификации
+
+    def form_invalid(self, form):
+        # Если форма неправильная, можем добавить сообщения об ошибках
+        messages.error(self.request, _('Invalid username or password.'))
+        return super().form_invalid(form)
